@@ -1,143 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
-<script type="text/javascript" src="./js/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="./js/waterfall.js"></script>
-<title>Jquery实现瀑布流</title>
+<meta charset="UTF-8" />
+<title>预加载-无序加载</title>
 <style>
-	*{margin: 0;padding: 0}
-	#main{
-		position: relative;
-	}
-	.pin{
-		float: left;
-		padding: 10px 0 0 15px;
-	}
+	html,body{height: 100%;}
+	a{text-decoration: none;}
 	.box{
-		padding: 10px;
-		border: 1px solid #ccc;
-		border-radius: 5px;
-		box-shadow: 0 0 6px #ccc;
+		text-align: center;
 	}
-	img{
-		width: 165px;
-		height: auto;
+	.btn{
+		display: inline-block;
+		height: 30px;
+		line-height: 30px;
+		border: 1px solid #ccc;
+		background-color: #fff;
+		padding: 0 10px;
+		margin-right: 50px;
+		color: #333;
+	}
+	.btn:hover{
+		background-color: #eee;
+	}
+	.loading{
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+    bottom: 0;
+    margin: auto;
+		background-color: #eee;
+	}
+	.progress{
+		margin-top: 300px;
+		text-align: center;
+		font-size: 30px;
+
 	}
 </style>
 </head>
 <body>
-	<div id="main">
-		<div class="pin">
-			<div class="box">
-				<img src="./images/1.jpg">
-			</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/2.jpg">
-			</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/3.jpg">
-			</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/4.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/5.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/6.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/7.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/8.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/9.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/10.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/11.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/12.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/13.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/14.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/15.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/16.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/17.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/18.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/19.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/20.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/21.jpg">
-		</div>
-		</div>
-		<div class="pin">
-			<div class="box">
-				<img src="./images/22.jpg">
-		</div>
-		</div>
+	<div class="box">
+		<img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411495&di=2e37fadd649d4aa06d6915071f06720e&imgtype=0&src=http%3A%2F%2Fpic26.photophoto.cn%2F20130323%2F0005018467298586_b.jpg" alt="pic" id="img" width="900" />
+		<p>
+			<a href="javascript:;" class="btn" data-control="prev">上一页</a>
+			<a href="javascript:;" class="btn" data-control="next">下一页</a>
+		</p>
 	</div>
+
+	<div class="loading">
+		<p class="progress">0%</p>
+	</div>
+
+<script src="jquery-1.8.3.min.js"></script>
+<script src="preload.js"></script>
+<script>
+	// $(function(){
+	// 	var imgs = [
+	// 		'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411495&di=2e37fadd649d4aa06d6915071f06720e&imgtype=0&src=http%3A%2F%2Fpic26.photophoto.cn%2F20130323%2F0005018467298586_b.jpg',
+	// 		'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411494&di=3774de78784a8a3cb898e66b6fda0587&imgtype=0&src=http%3A%2F%2Fpic11.photophoto.cn%2F20090510%2F0017031042011883_b.jpg',
+	// 		'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411492&di=0b142518f1afefcba735b338023fc3dd&imgtype=0&src=http%3A%2F%2Fpic.58pic.com%2F58pic%2F14%2F04%2F92%2F75558PICdVG_1024.jpg',
+	// 		'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411491&di=a0032a6496f0fac7e2b87463b3c25d27&imgtype=0&src=http%3A%2F%2Fpic27.nipic.com%2F20130310%2F10753400_155348590124_2.jpg',
+	// 		'https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1515650456&di=67cf794177b11a9b88bb962221666373&src=http://img1.3lian.com/2015/w8/37/d/89.jpg',
+	// 		'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660575612&di=f1d97d27975a834ec71f879bcfb7d745&imgtype=0&src=http%3A%2F%2Fpic3.16pic.com%2F00%2F10%2F26%2F16pic_1026230_b.jpg',
+	// 	];
+
+	// 	var index = 0;
+	// 	var len = imgs.length;
+	// 	var count = 0;
+	// 	var $progress = $('.progress');
+
+	// 	$.each(imgs,function(i,src){
+	// 			var imgObj = new Image();//实例化img对象
+
+	// 			$(imgObj).on('load error',function(){
+	// 				$progress.html(Math.round((count + 1) / len * 100)+'%');
+	// 				if (count >= len-1) {
+	// 					$('.loading').hide();
+	// 					document.title = '1/' + len;
+	// 				}
+	// 				count++;
+
+	// 			});
+
+	// 			imgObj.src = src;
+	// 	});
+
+	// 	$('.btn').on('click',function(){
+	// 		if($(this).data('control') === 'prev'){
+	// 			// index--;
+	// 			// if(index<0){
+	// 			// 	index = 0;
+	// 			// }    Math.max方法返回最大值，可传多个值
+	// 			index = Math.max(0,--index);  //--index即先将index--，再与0比较。index--为先比较再--
+	// 		}else{
+	// 			 index = Math.min(len - 1,++index);
+	// 		}
+	// 		document.title = (index +1) + '/'+len;
+	// 		$('#img').attr('src',imgs[index]);
+	// 	});
+	// })
+
+	$(function(){
+		var imgs = [
+			'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411495&di=2e37fadd649d4aa06d6915071f06720e&imgtype=0&src=http%3A%2F%2Fpic26.photophoto.cn%2F20130323%2F0005018467298586_b.jpg',
+			'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411494&di=3774de78784a8a3cb898e66b6fda0587&imgtype=0&src=http%3A%2F%2Fpic11.photophoto.cn%2F20090510%2F0017031042011883_b.jpg',
+			'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411492&di=0b142518f1afefcba735b338023fc3dd&imgtype=0&src=http%3A%2F%2Fpic.58pic.com%2F58pic%2F14%2F04%2F92%2F75558PICdVG_1024.jpg',
+			'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660411491&di=a0032a6496f0fac7e2b87463b3c25d27&imgtype=0&src=http%3A%2F%2Fpic27.nipic.com%2F20130310%2F10753400_155348590124_2.jpg',
+			'https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1515650456&di=67cf794177b11a9b88bb962221666373&src=http://img1.3lian.com/2015/w8/37/d/89.jpg',
+			'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515660575612&di=f1d97d27975a834ec71f879bcfb7d745&imgtype=0&src=http%3A%2F%2Fpic3.16pic.com%2F00%2F10%2F26%2F16pic_1026230_b.jpg',
+		];
+
+		var index = 0;
+		var len = imgs.length;
+		var $progress = $('.progress');
+
+		$.preload(imgs,{
+			each: function(count){
+				$progress.html(Math.round((count + 1) / len * 100)+'%');
+			},
+			all: function(){
+				$('.loading').hide();
+				document.title = '1/' + len;
+			}
+		});
+
+
+		$('.btn').on('click',function(){
+			if($(this).data('control') === 'prev'){
+				// index--;
+				// if(index<0){
+				// 	index = 0;
+				// }    Math.max方法返回最大值，可传多个值
+				index = Math.max(0,--index);  //--index即先将index--，再与0比较。index--为先比较再--
+			}else{
+				 index = Math.min(len - 1,++index);
+			}
+			document.title = (index +1) + '/'+len;
+			$('#img').attr('src',imgs[index]);
+		});
+	})
+</script>
 </body>
 </html>
