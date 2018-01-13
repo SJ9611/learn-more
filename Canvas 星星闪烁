@@ -1,0 +1,293 @@
+<!------------------ HTML -------------------->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>star girl</title>
+</head>
+<body>
+	<div>
+		<canvas id="canvas" width="800" height="600"></canvas>
+	</div>
+	<script src="./js/main.js"></script>
+	<script src="./js/commonFunctions.js"></script>
+	<script src="./js/stars.js"></script>
+</body>
+</html>
+
+<!------------------- js --------------------->
+
+<!------ main.js ------>
+
+var can;
+var ctx;
+var w;
+var h;
+var girlPic = new Image();
+var starPic = new Image();
+
+var num = 60;
+var stars =[];
+
+var lastTime;
+var deltaTime;
+
+var switchy = false;
+var life = 0;
+
+function init(){
+	can = document.getElementById('canvas');
+	ctx = can.getContext('2d');
+
+	w = can.width;
+	h = can.height;
+
+	document.addEventListener("mousemove",mousemove,false);
+
+	girlPic.src = "images/girl.jpg";
+	starPic.src = "images/star.png";
+
+	for (var i = 0; i < num; i++) {
+		var obj = new starObj();
+		stars.push(obj);
+		stars[i].init();
+
+	}
+	lastTime = Date.now();
+	gameloop();
+}
+
+document.body.onload = init;
+
+function gameloop(){
+	window.requestAnimFrame(gameloop);  //定时器，根据设备的性能来确定调用的时间间隔
+	var now = Date.now();
+	deltaTime = now - lastTime;
+	lastTime = now; 
+
+	drawBackground();
+	drawGirl();
+	drawStars();
+	aliveUpdate();
+}
+
+function drawBackground(){
+	ctx.fillStyle = '#393550';
+	ctx.fillRect(0, 0, w, h);
+}
+
+function drawGirl(){
+	//drawImage(img,x,y,width,hright)
+	//x轴坐标正方向向右,y轴坐标正方向向下，（0，0）
+	ctx.drawImage(girlPic,100,150,600,300);
+}
+
+function mousemove(e){
+	if (e.offsetX || e.layerX) {
+		var px = e.offsetX == undefined ? e.layerX : e.offsetX;
+		var py = e.offsetY == undefined ? e.layerY : e.offsetY;
+		//out switchy = false;in switch = true;
+		//px 在范围内 && py 在范围内
+		if(px > 100 && px <700 && py >150 && py <450){
+			switchy = true;
+		}else{
+			switchy = false;			
+		}
+	}
+}
+
+<!------ stars.js ------>
+
+var starObj = function(){
+	this.x;
+	this.y;
+	this.picNo;
+	this.timer;
+	this.xSpd;
+	this.ySpd;
+}
+
+starObj.prototype.init = function() {   //初始化
+	this.x = Math.random()*600 + 100;
+	this.y = Math.random()*300 + 150;
+	this.picNo = Math.floor(Math.random() * 7);
+	this.timer = 0;
+
+	this.xSpd = Math.random() *3 - 1.5;
+	this.ySpd = Math.random() *3 - 1.5;
+}
+
+starObj.prototype.update = function(){
+	this.x += this.xSpd * deltaTime * 0.004;
+	this.y += this.ySpd * deltaTime * 0.004;
+	//this.x 超过范围 init
+	if(this.x < 100 || this.x > 700){
+		this.init();
+		return;
+	}
+	//this.y 超过范围 init
+	if (this.y < 150 || this.y > 450) {
+		this.init();
+		return;
+	}
+
+	this.timer += deltaTime;
+	if(this.timer > 50){
+		this.picNo += 1;
+		this.picNo %= 7;
+		this.timer = 0;
+	}
+}
+
+starObj.prototype.draw = function () {
+	//save
+	ctx.save();
+	//globalAlpha全局透明度
+	ctx.globalAlpha = life;
+	//drawImage(img,sx,sy,swidth,sheight,x,y,width,height)
+	ctx.drawImage(starPic, this.picNo * 7, 0, 7, 7, this.x, this.y, 7, 7);
+	//restore()
+	ctx.restore();
+}
+
+function drawStars(){
+	for(var i = 0 ;i <num;i++){
+		stars[i].update();
+		stars[i].draw();
+	}
+}
+
+function aliveUpdate(){
+	if (switchy) {
+		//show stars
+		life += 0.03 * deltaTime *0.05;
+		if (life > 1) {
+			life = 1;
+		}
+	}else{
+		//hide stars
+		life -= 0.03 *deltaTime *0.05;
+		if (life < 0) {
+			life = 0;
+		}
+	}
+}
+
+//封装好的插件，为requestAnimFrame方法对不同浏览器进行配适
+<!--------commonFunctions.js--------->
+
+window.requestAnimFrame = (function() {
+	return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+			return window.setTimeout(callback, 1000 / 60);
+		};
+})();
+
+
+function calLength2(x1, y1, x2, y2) {
+	return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
+}
+
+
+function randomColor() {
+	var col = [0, 1, 2];
+	col[0] = Math.random() * 100 + 155;
+	col[0] = col[0].toFixed();
+	col[1] = Math.random() * 100 + 155;
+	col[1] = col[1].toFixed();
+	col[2] = Math.random() * 100 + 155;
+	col[2] = col[2].toFixed();
+	var num = Math.floor(Math.random() * 3);
+	col[num] = 0;
+	return "rgba(" + col[0] + "," + col[1] + "," + col[2] + ",";
+}
+
+
+function lerpAngle(a, b, t) {
+	var d = b - a;
+	if (d > Math.PI) d = d - 2 * Math.PI;
+	if (d < -Math.PI) d = d + 2 * Math.PI;
+	return a + d * t;
+}
+
+function inOboundary(arrX, arrY, l, r, t, b) { //在l r t b范围内的检测
+	return arrX > l && arrX < r && arrY > t && arrY < b;
+}
+
+function rgbColor(r, g, b) {
+	r = Math.round(r * 256);
+	g = Math.round(g * 256);
+	b = Math.round(b * 256);
+	return "rgba(" + r + "," + g + "," + b + ",1)";
+}
+
+function rgbNum(r, g, b) {
+	r = Math.round(r * 256);
+	g = Math.round(g * 256);
+	b = Math.round(b * 256);
+	return "rgba(" + r + "," + g + "," + b;
+}
+
+function rnd(m) {
+	var n = m || 1;
+	return Math.random() * n;
+}
+
+function rateRandom(m, n) {
+	var sum = 0;
+	for (var i = 1; i < (n - m); i++) {
+		sum += i;
+
+	}
+
+	var ran = Math.random() * sum;
+
+	for (var i = 1; i < (n - m); i++) {
+		ran -= i;
+		if (ran < 0) {
+			return i - 1 + m;
+		}
+	}
+}
+
+function distance(x1, y1, x2, y2, l) {
+	var x = Math.abs(x1 - x2);
+	var y = Math.abs(y1 - y2);
+	if (x < l && y < l) {
+		return true;
+	}
+	return false;
+}
+
+function AABBbox(object1, w1, h1, object2, w2, h2, overlap) {
+	A1 = object1.x + overlap;
+	B1 = object1.x + w1 - overlap;
+	C1 = object1.y + overlap;
+	D1 = object1.y + h1 - overlap;
+
+	A2 = object2.x + overlap;
+	B2 = object2.x + w2 - overlap;
+	C2 = object2.y + overlap;
+	D2 = object2.y + h2 - overlap;
+
+	if (A1 > B2 || B1 < A2 || C1 > D2 || D1 < C2) return false;
+	else return true;
+}
+
+
+function dis2(x, y, x0, y0) {
+	var dx = x - x0;
+	var dy = y - y0;
+	return dx * dx + dy * dy;
+}
+
+function rndi2(m, n) {
+	var a = Math.random() * (n - m) + m;
+	return Math.floor(a);
+}
+
+
+
+
+
